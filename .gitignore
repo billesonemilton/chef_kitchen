@@ -1,1 +1,6 @@
 node_modules/
+strapi/build/
+strapi/.cache/
+strapi/dist/
+strapi/exports/
+.strapi/
