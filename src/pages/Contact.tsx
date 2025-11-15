@@ -16,8 +16,9 @@ const Contact = () => {
     eventType: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic validation
@@ -30,19 +31,54 @@ const Contact = () => {
       return;
     }
 
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for contacting us. We'll get back to you soon!",
-    });
-    
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      eventType: "",
-      message: "",
-    });
+    setIsSubmitting(true);
+
+    try {
+      // Replace YOUR_STRAPI_URL with your actual Strapi URL
+      // Example: http://localhost:1337 or https://your-strapi-domain.com
+      const response = await fetch("http://localhost:1337/api/contact-forms", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    data: {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      eventType: formData.eventType,
+      message: formData.message,
+    },
+  }),
+});
+
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
+
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for contacting us. We'll get back to you soon!",
+      });
+      
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        eventType: "",
+        message: "",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again or contact us directly.",
+        variant: "destructive",
+      });
+      console.error("Form submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -144,6 +180,7 @@ const Contact = () => {
                     onChange={handleChange}
                     placeholder="Name"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -158,6 +195,7 @@ const Contact = () => {
                     onChange={handleChange}
                     placeholder="Name@example.com"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -171,6 +209,7 @@ const Contact = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="+237679591261"
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -183,6 +222,7 @@ const Contact = () => {
                     value={formData.eventType}
                     onChange={handleChange}
                     placeholder="Wedding, Birthday, Corporate, etc."
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -197,15 +237,17 @@ const Contact = () => {
                     placeholder="Tell us about your event, number of guests, date, and any special requirements..."
                     rows={5}
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
 
                 <Button
                   type="submit"
                   className="w-full bg-chef-brown hover:bg-chef-brown-dark text-white"
+                  disabled={isSubmitting}
                 >
                   <Send className="mr-2 h-4 w-4" />
-                  Send Message
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </div>
